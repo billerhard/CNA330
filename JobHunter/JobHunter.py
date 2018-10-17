@@ -86,8 +86,8 @@ def load_config_file(filename):
         file.write("")
         file.close()
 
-    for row in file_contents:
-        argument_dictionary += row
+    # for row in file_contents:
+    #     argument_dictionary += row
     ## Add in information for argument dictionary
     return argument_dictionary
 
