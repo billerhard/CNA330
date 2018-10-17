@@ -76,7 +76,6 @@ def load_config_file(filename):
     argument_dictionary = 0
     # Code from https://github.com/RTCedu/CNA336/blob/master/Spring2018/FileIO.py
     rel_path = os.path.abspath(os.path.dirname(__file__))
-    file = 0
     file_contents = 0
     try:
         file = open(filename, "r")
@@ -87,6 +86,8 @@ def load_config_file(filename):
         file.write("")
         file.close()
 
+    for row in file_contents:
+        argument_dictionary += row
     ## Add in information for argument dictionary
     return argument_dictionary
 
@@ -110,9 +111,12 @@ def main():
     # Connect to SQL and get cursor
     conn = connect_to_sql()
     cursor = conn.cursor()
+    arg_dict = load_config_file(sys.argv[1])
+
     create_tables(cursor, "jobs")
     # Load text file and store arguments into dictionary
-    arg_dict = load_config_file("config.cfg")
+
+    #config 1 tablename 2 location 3 0 4 description
     j = jobhunt(arg_dict)
 #    add_new_job(cursor, j)
     #while(1):
