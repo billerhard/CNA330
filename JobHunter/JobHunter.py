@@ -19,7 +19,9 @@ def connect_to_sql():
 
 # Create the table structure
 def create_tables(cursor, table):
-    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} (id INT PRIMARY KEY);")
+    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} (id INT PRIMARY KEY, post_date DATE, title TEXT, location "
+                   f"TEXT, full_part TEXT, description TEXT, apply_info TEXT, company TEXT, salary FLOAT, raw_message"
+                   f" TEXT  );")
     return
 
 
