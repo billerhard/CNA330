@@ -34,8 +34,10 @@ def query_sql(cursor, query):
 # Add a new job
 def add_new_job(cursor, jobdetails):
     ## Add your code here
-    query = "INSERT INTO"
-    return query_sql(cursor, query)
+    for job in jobdetails:
+        query = f"INSERT INTO {table} (post_date, title, location, full_part, description, apply_info, company, salary, raw_message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?))"
+        query_sql(cursor, query)
+    return
 
 
 # Check if new job
@@ -54,14 +56,13 @@ def delete_job(cursor, jobdetails):
 # Grab new jobs from a website
 def fetch_new_jobs(arg_dict):
     # Code from https://github.com/RTCedu/CNA336/blob/master/Spring2018/Sql.py
-    query = "https://jobs.github.com/positions.json?" + "&location=seattle" # + "&description=" + description # Add arguments here
+    query = "https://jobs.github.com/positions.json"#?" + "&location=seattle" # + "&description=" + description # Add arguments here
     jsonpage = 0
     try:
         contents = urllib.request.urlopen(query)
         response = contents.read()
         jsonpage = json.loads(response)
-        for job in jsonpage:
-            print(job)
+
 
 
     except:
@@ -112,7 +113,8 @@ def main():
     create_tables(cursor, "jobs")
     # Load text file and store arguments into dictionary
     arg_dict = load_config_file("config.cfg")
-    jobhunt(arg_dict)
+    j = jobhunt(arg_dict)
+#    add_new_job(cursor, j)
     #while(1):
      #   jobhunt(arg_dict)
      #   time.sleep(3600) # Sleep for 1h
