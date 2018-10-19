@@ -1,6 +1,6 @@
 # This script pulls from a job website and stores positions into a database. If there is a new posting it notifies the user.
 # CNA 330
-# Zachary Rubin, zrubin@rtc.edu
+# Bill Erhard, wherhard@student.rtc.edu
 import mysql.connector
 import sys
 import json
@@ -12,14 +12,15 @@ import time
 # Connect to database
 def connect_to_sql():
     conn = mysql.connector.connect(user='root', password='',
-                                  host='127.0.0.1',
-                                  database='cna330')
+                                   host='127.0.0.1',
+                                   database='cna330')
     return conn
 
 
 # Create the table structure
 def create_tables(cursor, table):
-    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} (id INT PRIMARY KEY, post_date DATE, title TEXT, location "
+    cursor.execute(f"DROP TABLE {table}")
+    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} (id INT PRIMARY KEY, post_date TEXT, title TEXT, location "
                    f"TEXT, full_part TEXT, description TEXT, apply_info TEXT, company TEXT, salary FLOAT, raw_message"
                    f" TEXT  );")
     return
@@ -33,14 +34,15 @@ def query_sql(cursor, query):
 
 # Add a new job
 def add_new_job(cursor, jobdetails):
-    ## Add your code here
+    i = 0
     for job in jobdetails:
-        query = f"INSERT INTO {table} (post_date, title, location, full_part, description, apply_info, company, salary, raw_message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?))"
-        query_sql(cursor, query)
-    return
+        # YYYY-MM-DD HH:MM:SS
+        # github=Fri Oct 19 02:00:00 UTC 2018
+        sql = f"INSERT INTO jobs (id, post_date, title, location, full_part) VALUES ({i}, '{job['created_at']}', '{job['title']}', '{job['location']}', '{job['type']}');"
+        cursor.execute(sql)
+        i += 1
 
 
-# Check if new job
 def check_if_job_exists(cursor, jobdetails):
     ## Add your code here
     query = "SELECT"
@@ -56,7 +58,7 @@ def delete_job(cursor, jobdetails):
 # Grab new jobs from a website
 def fetch_new_jobs(arg_dict):
     # Code from https://github.com/RTCedu/CNA336/blob/master/Spring2018/Sql.py
-    query = "https://jobs.github.com/positions.json"#?" + "&location=seattle" # + "&description=" + description # Add arguments here
+    query = "https://jobs.github.com/positions.json"  # ?" + "&location=seattle" # + "&description=" + description # Add arguments here
     jsonpage = 0
     try:
         contents = urllib.request.urlopen(query)
@@ -97,6 +99,7 @@ def jobhunt(arg_dict):
     # Fetch jobs from website
     jobpage = fetch_new_jobs(arg_dict)
     # print (jobpage)
+    return jobpage
     ## Add your code here to parse the job page
 
     ## Add in your code here to check if the job already exists in the DB
@@ -109,6 +112,8 @@ def jobhunt(arg_dict):
 # Setup portion of the program. Take arguments and set up the script
 def main():
     # Connect to SQL and get cursor
+    fields = ["id", "post_date", "title", "location", "full_part", "description", "apply_info", "company", "salary",
+              "raw_message"]
     conn = connect_to_sql()
     cursor = conn.cursor()
     arg_dict = load_config_file(sys.argv[1])
@@ -116,12 +121,15 @@ def main():
     create_tables(cursor, "jobs")
     # Load text file and store arguments into dictionary
 
-    #config 1 tablename 2 location 3 0 4 description
+    # config 1 tablename 2 location 3 0 4 description
     j = jobhunt(arg_dict)
-#    add_new_job(cursor, j)
-    #while(1):
-     #   jobhunt(arg_dict)
-     #   time.sleep(3600) # Sleep for 1h
+
+    add_new_job(cursor, j)
+
+
+# while(1):
+#   jobhunt(arg_dict)
+#   time.sleep(3600) # Sleep for 1h
 
 
 if __name__ == '__main__':
