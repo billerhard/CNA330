@@ -38,8 +38,12 @@ def add_new_job(cursor, jobdetails):
     for job in jobdetails:
         # YYYY-MM-DD HH:MM:SS
         # github=Fri Oct 19 02:00:00 UTC 2018
-        sql = f"INSERT INTO jobs (id, post_date, title, location, full_part) VALUES ({i}, '{job['created_at']}', '{job['title']}', '{job['location']}', '{job['type']}');"
-        cursor.execute(sql)
+        # https://stackoverflow.com/questions/7540803/escaping-strings-with-python-mysql-connector
+        data = (i, job['created_at'], job['title'], job['location'], job['type'], job['description'], job['how_to_apply'], job['company'], str(job))
+        # I had a fun time here for a sec because my wamp setup mysql to use latin swedish charset... wat?
+        # print(job)
+        sql = "INSERT INTO jobs (id, post_date, title, location, full_part, description, apply_info, company, raw_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+        cursor.execute(sql, data)
         i += 1
 
 
