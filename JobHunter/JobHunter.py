@@ -36,9 +36,9 @@ def add_new_job(cursor, job_details):
     data = (job_details['id'], job_details['created_at'], job_details['title'], job_details['location'], job_details['type'], job_details['description'],
             job_details['how_to_apply'], job_details['company'], "Bookoo Bucks", str(job_details))
     sql = "INSERT INTO jobs (job_id, post_date, title, location, full_part, description, apply_info, company, " \
-          "salary, raw_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s); " % data
+          "salary, raw_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s); "
 
-    query_sql(cursor, sql)
+    cursor.execute(sql, data)
 
 
 def check_if_job_exists(cursor, jobdetails):
