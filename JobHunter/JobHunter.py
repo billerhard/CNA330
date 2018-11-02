@@ -19,10 +19,10 @@ def connect_to_sql():
 def create_tables(cursor, table, fields):
     fields.insert(0, table)
     fields = tuple(fields)
-    query = 'CREATE TABLE IF NOT EXISTS %s (%s INTEGER PRIMARY KEY AUTO_INCREMENT, %s TEXT, %s TEXT, %s TEXT, ' \
-            '%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT);' % fields
-    cursor.execute(query)
-    return
+    query = '''CREATE TABLE IF NOT EXISTS %s (%s INTEGER PRIMARY KEY AUTO_INCREMENT, %s TEXT, %s TEXT, %s TEXT, ''' \
+            '''%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT);''' % fields
+
+    return query_sql(cursor, query)
 
 
 def query_sql(cursor, query):
@@ -30,26 +30,31 @@ def query_sql(cursor, query):
     return cursor
 
 
-def add_new_job(cursor, jobdetails):
-    for job in jobdetails:
-        if check_if_job_exists(cursor, job):
-            continue
-        # https://stackoverflow.com/questions/7540803/escaping-strings-with-python-mysql-connector
-        data = (job['id'], job['created_at'], job['title'], job['location'], job['type'], job['description'],
-                job['how_to_apply'], job['company'], "Bookoo Bucks", str(job))
-        sql = "INSERT INTO jobs (job_id, post_date, title, location, full_part, description, apply_info, company, " \
-              "salary, raw_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s); "
-        cursor.execute(sql, data)
+def add_new_job(cursor, job_details):
+    # https://stackoverflow.com/questions/7540803/escaping-strings-with-python-mysql-connector
+
+    data = (job_details['id'], job_details['created_at'], job_details['title'], job_details['location'], job_details['type'], job_details['description'],
+            job_details['how_to_apply'], job_details['company'], "Bookoo Bucks", str(job_details))
+    sql = "INSERT INTO jobs (job_id, post_date, title, location, full_part, description, apply_info, company, " \
+          "salary, raw_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s); " % data
+
+    query_sql(cursor, sql)
 
 
 def check_if_job_exists(cursor, jobdetails):
-    query = 'SELECT %s FROM %s WHERE %s="%s";' % ("job_id", "jobs", "job_id", jobdetails['id'])
+    query = '''SELECT %s FROM %s WHERE %s="%s";''' % ("job_id", "jobs", "job_id", jobdetails['id'])
     cursor.execute(query)
     return cursor.fetchall()
 
 
+def get_job_id(cursor, jobdetails):
+
+    pass
+
+
 def delete_job(cursor, jobdetails):
-    query = "UPDATE"
+    job_id = get_job_id(cursor, jobdetails)
+    query = '''DELETE FROM %s WHERE %s=%s''' % ("jobs", "id", job_id)
     return query_sql(cursor, query)
 
 
@@ -67,7 +72,6 @@ def fetch_new_jobs(arg_dict):
     return jsonpage
 
 
-# Load a text-based configuration file
 def load_config_file(filename):
     argument_dictionary = ""
     # Code from https://github.com/RTCedu/CNA336/blob/master/Spring2018/FileIO.py
@@ -87,10 +91,12 @@ def load_config_file(filename):
     return argument_dictionary
 
 
-# Main area of the code.
-def jobhunt(arg_dict):
-
+def jobhunt(cursor, arg_dict):
     jobpage = fetch_new_jobs(arg_dict)
+    for job in jobpage:
+        if check_if_job_exists(cursor, job):
+            continue
+        add_new_job(cursor, job)
     return jobpage
 
 
@@ -101,8 +107,7 @@ def main():
     cursor = conn.cursor()
     arg_dict = load_config_file(sys.argv[1]).split('\n')
     create_tables(cursor, arg_dict[0], fields)
-    list_of_jobs = jobhunt(arg_dict)
-    add_new_job(cursor, list_of_jobs)
+    jobhunt(cursor, arg_dict)
 
 
 if __name__ == '__main__':
