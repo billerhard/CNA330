@@ -38,6 +38,7 @@ def add_new_job(cursor, job_details):
     sql = "INSERT INTO jobs (job_id, post_date, title, location, full_part, description, apply_info, company, " \
           "salary, raw_message) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s); "
 
+
     cursor.execute(sql, data)
 
 
