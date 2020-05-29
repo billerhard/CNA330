@@ -2,12 +2,10 @@
 # the user.
 # CNA 330
 # Bill Erhard, wherhard@student.rtc.edu
-import sqlite3
-
-import sys
 import json
+import sqlite3
+import sys
 import urllib.request
-import os
 
 
 def connect_to_sql():
@@ -16,9 +14,8 @@ def connect_to_sql():
 
 
 def create_tables(cursor, fields):
-    fields = tuple(fields)
     query = '''CREATE TABLE IF NOT EXISTS jobs (%s TEXT, %s TEXT, %s TEXT, ''' \
-            '''%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT);''' % fields
+            '''%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT);''' % tuple(fields)
 
     return cursor.execute(query)
 
@@ -52,7 +49,6 @@ def fetch_new_jobs(arg_dict, page):
     except:
         print("whoops")
         pass
-    #print(jsonpage)
     return jsonpage
 
 
